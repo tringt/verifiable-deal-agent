@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">Verifiable Deal Agent proof trace demo</title>
+  <desc id="desc">A CHECK decision for a live Ozon offer with a SHA-256 evidence hash.</desc>
+  <rect width="1200" height="630" fill="#0b1020"/>
+  <rect x="55" y="55" width="1090" height="520" rx="28" fill="#121a31" stroke="#2b3b66" stroke-width="2"/>
+  <text x="105" y="135" fill="#f8fafc" font-family="Arial, sans-serif" font-size="44" font-weight="700">Verifiable Deal Agent</text>
+  <text x="105" y="180" fill="#94a3b8" font-family="Arial, sans-serif" font-size="24">Read-only proof trace • Marketplace evidence</text>
+  <rect x="105" y="220" width="158" height="55" rx="27" fill="#f59e0b"/>
+  <text x="184" y="257" text-anchor="middle" fill="#17120a" font-family="Arial, sans-serif" font-size="25" font-weight="700">CHECK</text>
+  <text x="105" y="336" fill="#e2e8f0" font-family="Arial, sans-serif" font-size="30" font-weight="700">Demo cordless trim router</text>
+  <text x="105" y="382" fill="#cbd5e1" font-family="Arial, sans-serif" font-size="25">Ozon • 4,490 RUB • in stock • solo / tool only</text>
+  <text x="105" y="433" fill="#94a3b8" font-family="Arial, sans-serif" font-size="22">Live price confirmed  ·  Kit identified  ·  Price history still insufficient</text>
+  <rect x="105" y="470" width="990" height="65" rx="12" fill="#070b16"/>
+  <text x="132" y="511" fill="#67e8f9" font-family="Consolas, monospace" font-size="22">SHA-256  1f0a0dcbc3db7ecb51d8b5c0d32262c96a77379b39af7f1076de9f77549d2535</text>
+</svg>
