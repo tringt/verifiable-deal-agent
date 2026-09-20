@@ -4,4 +4,4 @@ out/
 .env
 .env.*
 !.env.example
-
+.sphere-agent/

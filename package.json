@@ -6,6 +6,7 @@
   "scripts": {
     "build": "tsc",
     "demo": "tsx src/demo.ts",
+    "identity:init": "tsx src/identity.ts",
     "trace": "tsx src/cli.ts",
     "test": "tsx --test src/**/*.test.ts"
   },
