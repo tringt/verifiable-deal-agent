@@ -5,14 +5,14 @@ const dataDir = ".sphere-agent";
 
 const providers = createNodeProviders({
   dataDir,
-  network: "testnet",
+  network: "testnet2",
   transport: { timeout: 5_000 }
 });
 
 const { created, sphere } = await Sphere.init({
   ...providers,
   autoGenerate: true,
-  network: "testnet",
+  network: "testnet2",
   walletApi: "none"
 });
 
@@ -24,7 +24,7 @@ if (!identity?.chainPubkey) {
 
 console.log(JSON.stringify({
   created,
-  network: "testnet",
+  network: "testnet2",
   chainPubkey: identity.chainPubkey,
   directAddress: identity.directAddress ?? null,
   storage: dataDir

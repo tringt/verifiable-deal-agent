@@ -58,10 +58,12 @@ The generated JSON contains:
 
 - No automatic purchases or trading.
 - No marketplace credentials, session cookies, or private keys in this repo.
-- Sphere SDK is installed, but testnet identity and settlement are intentionally
-  not wired in yet.
+- A local Sphere **testnet2** identity is generated under `.sphere-agent/` and
+  is excluded from Git.
+- `npm run anchor -- <trace.json> --publish-testnet` anchors a trace as a
+  coinless testnet NFT. Settlement and payments are intentionally not wired in.
 
 ## Next milestone
 
-Connect a locally stored Sphere **testnet** agent identity, anchor a trace, and
-verify it end-to-end without handling real funds.
+Connect the trace CLI to a read-only marketplace decision feed and verify each
+anchored token against its local receipt without handling real funds.
