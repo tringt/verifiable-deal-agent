@@ -1,0 +1,22 @@
+{
+  "version": "1",
+  "observedAt": "2026-09-20T12:00:00.000Z",
+  "offer": {
+    "source": "ozon",
+    "url": "https://www.ozon.ru/product/example-router-123/",
+    "title": "Demo cordless trim router",
+    "priceRub": 4490,
+    "inStock": true,
+    "checkedAt": "2026-09-20T12:00:00.000Z",
+    "kit": "solo / tool only"
+  },
+  "decision": {
+    "status": "CHECK",
+    "reasons": [
+      "live_price_confirmed",
+      "in_stock",
+      "kit_identified",
+      "insufficient_price_history"
+    ]
+  }
+}

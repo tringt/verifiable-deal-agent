@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import { createEvidenceTrace, type DealEvidence } from "./evidence.js";
@@ -34,4 +35,14 @@ test("creates the same SHA-256 regardless of object key order", () => {
 
   assert.match(originalTrace.sha256, /^[a-f0-9]{64}$/);
   assert.equal(originalTrace.sha256, reorderedTrace.sha256);
+});
+
+test("creates a stable public proof trace from the documented demo evidence", async () => {
+  const raw = await readFile(new URL("../examples/verified-check.evidence.json", import.meta.url), "utf8");
+  const trace = createEvidenceTrace(JSON.parse(raw) as DealEvidence);
+
+  assert.equal(
+    trace.sha256,
+    "1f0a0dcbc3db7ecb51d8b5c0d32262c96a77379b39af7f1076de9f77549d2535"
+  );
 });

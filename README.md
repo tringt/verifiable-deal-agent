@@ -33,6 +33,8 @@ Get-Content out\deal-evidence.json
 
 `npm run demo` writes a sample trace to `out/deal-evidence.json`.
 
+For a fixed, publicly reproducible example, see the [demo proof trace](docs/DEMO.md).
+
 ## Create a trace from deal evidence
 
 Export a verified offer decision as JSON, then create its local trace:
