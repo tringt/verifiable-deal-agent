@@ -33,6 +33,17 @@ Get-Content out\deal-evidence.json
 
 `npm run demo` writes a sample trace to `out/deal-evidence.json`.
 
+## Create a trace from deal evidence
+
+Export a verified offer decision as JSON, then create its local trace:
+
+```powershell
+npm run trace -- path\to\evidence.json out\trace.json
+```
+
+The input follows the schema in `src/evidence.ts`: source, URL, title, live
+price, availability, kit, decision status, and reason codes.
+
 ## Trace format
 
 The generated JSON contains:
@@ -52,4 +63,3 @@ The generated JSON contains:
 
 Connect a locally stored Sphere **testnet** agent identity, anchor a trace, and
 verify it end-to-end without handling real funds.
-
