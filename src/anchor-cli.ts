@@ -1,10 +1,28 @@
-import { readFile, writeFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import { Sphere } from "@unicitylabs/sphere-sdk";
 import { createNodeProviders, createWalletApiProviders } from "@unicitylabs/sphere-sdk/impl/nodejs";
-import { buildAnchorMetadata, getNodeProviderConfig, getTestnetWalletConfig, parseAnchorCommand, validateTraceForAnchor, type EvidenceTrace } from "./anchor.js";
+import {
+  buildAnchorMetadata,
+  createPendingAnchor,
+  finalizeAnchorReceipt,
+  getNodeProviderConfig,
+  getTestnetWalletConfig,
+  parseAnchorCommand,
+  readAnchorReceipt,
+  validateTraceForAnchor,
+  type EvidenceTrace
+} from "./anchor.js";
 
 const { tracePath, publish } = parseAnchorCommand(process.argv.slice(2));
 const trace = validateTraceForAnchor(JSON.parse(await readFile(tracePath, "utf8")) as EvidenceTrace);
+
+if (publish) {
+  const existingReceipt = await readAnchorReceipt(tracePath, trace.sha256);
+  if (existingReceipt) {
+    console.log(JSON.stringify(existingReceipt, null, 2));
+    process.exit(0);
+  }
+}
 
 const providers = createNodeProviders(getNodeProviderConfig());
 console.error("anchor:init");
@@ -32,6 +50,11 @@ if (!publish) {
 }
 
 console.error("anchor:mint-request");
+await createPendingAnchor(tracePath, {
+  network: "testnet2",
+  traceSha256: trace.sha256,
+  issuer: sphere.identity.directAddress
+});
 const result = await sphere.payments.mintNft({ content: metadata, sign: true });
 console.error("anchor:mint-result");
 if (!result.success || !result.tokenId) {
@@ -44,7 +67,7 @@ const receipt = {
   tokenId: result.tokenId,
   issuer: sphere.identity.directAddress,
   anchoredAt: new Date().toISOString()
-};
-await writeFile(`${tracePath}.testnet-anchor.json`, `${JSON.stringify(receipt, null, 2)}\n`, "utf8");
+} as const;
+await finalizeAnchorReceipt(tracePath, receipt);
 console.log(JSON.stringify(receipt, null, 2));
 await sphere.destroy();

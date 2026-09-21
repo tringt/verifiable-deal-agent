@@ -1,4 +1,5 @@
 import type { NftMetadata } from "@unicitylabs/sphere-sdk";
+import { readFile, unlink, writeFile } from "node:fs/promises";
 import { createEvidenceTrace, type DealEvidence } from "./evidence.js";
 
 export interface AnchorMetadataInput {
@@ -11,6 +12,56 @@ export interface EvidenceTrace {
   evidence: DealEvidence;
   sha256: string;
   createdAt: string;
+}
+
+export interface PendingAnchor {
+  network: "testnet2";
+  traceSha256: string;
+  issuer: string;
+}
+
+export interface AnchorReceipt extends PendingAnchor {
+  tokenId: string;
+  anchoredAt: string;
+}
+
+function receiptPath(tracePath: string): string {
+  return `${tracePath}.testnet-anchor.json`;
+}
+
+function pendingPath(tracePath: string): string {
+  return `${tracePath}.testnet-anchor.pending.json`;
+}
+
+export async function readAnchorReceipt(tracePath: string, sha256: string): Promise<AnchorReceipt | undefined> {
+  try {
+    const receipt = JSON.parse(await readFile(receiptPath(tracePath), "utf8")) as AnchorReceipt;
+    if (receipt.traceSha256 !== sha256) {
+      throw new Error("Existing anchor receipt belongs to a different trace");
+    }
+    return receipt;
+  } catch (error: unknown) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      return undefined;
+    }
+    throw error;
+  }
+}
+
+export async function createPendingAnchor(tracePath: string, pending: PendingAnchor): Promise<void> {
+  try {
+    await writeFile(pendingPath(tracePath), `${JSON.stringify(pending, null, 2)}\n`, { encoding: "utf8", flag: "wx" });
+  } catch (error: unknown) {
+    if ((error as NodeJS.ErrnoException).code === "EEXIST") {
+      throw new Error("An unconfirmed anchor attempt already exists; reconcile it before retrying");
+    }
+    throw error;
+  }
+}
+
+export async function finalizeAnchorReceipt(tracePath: string, receipt: AnchorReceipt): Promise<void> {
+  await writeFile(receiptPath(tracePath), `${JSON.stringify(receipt, null, 2)}\n`, "utf8");
+  await unlink(pendingPath(tracePath));
 }
 
 export function parseAnchorCommand(args: string[]): { tracePath: string; publish: boolean } {
@@ -29,11 +80,16 @@ export function getTestnetWalletConfig() {
   };
 }
 
-export function getNodeProviderConfig() {
+export function getNodeProviderConfig(env: NodeJS.ProcessEnv = process.env) {
+  const apiKey = env.UNICITY_TESTNET_ORACLE_API_KEY;
+  if (!apiKey) {
+    throw new Error("UNICITY_TESTNET_ORACLE_API_KEY is required for testnet anchoring");
+  }
+
   return {
     dataDir: ".sphere-agent",
     network: "testnet2" as const,
-    oracle: { apiKey: "sk_ddc3cfcc001e4a28ac3fad7407f99590" },
+    oracle: { apiKey },
     transport: { timeout: 10_000 }
   };
 }

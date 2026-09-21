@@ -1,7 +1,19 @@
 import assert from "node:assert/strict";
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import test from "node:test";
 
-import { buildAnchorMetadata, getNodeProviderConfig, getTestnetWalletConfig, parseAnchorCommand, validateTraceForAnchor } from "./anchor.js";
+import {
+  buildAnchorMetadata,
+  createPendingAnchor,
+  finalizeAnchorReceipt,
+  getNodeProviderConfig,
+  getTestnetWalletConfig,
+  readAnchorReceipt,
+  parseAnchorCommand,
+  validateTraceForAnchor
+} from "./anchor.js";
 import { createEvidenceTrace } from "./evidence.js";
 
 test("buildAnchorMetadata binds a trace hash as an immutable NFT attribute", () => {
@@ -70,11 +82,49 @@ test("getTestnetWalletConfig uses one network name across Sphere and wallet-api"
   });
 });
 
-test("node provider config matches the wallet-api testnet2 challenge network", () => {
-  assert.deepEqual(getNodeProviderConfig(), {
+test("node provider config requires a locally supplied testnet oracle key", () => {
+  assert.throws(
+    () => getNodeProviderConfig({}),
+    /UNICITY_TESTNET_ORACLE_API_KEY/
+  );
+
+  assert.deepEqual(getNodeProviderConfig({ UNICITY_TESTNET_ORACLE_API_KEY: "test-key" }), {
     dataDir: ".sphere-agent",
     network: "testnet2",
-    oracle: { apiKey: "sk_ddc3cfcc001e4a28ac3fad7407f99590" },
+    oracle: { apiKey: "test-key" },
     transport: { timeout: 10_000 }
   });
+});
+
+test("pending anchor blocks a duplicate publish until the original outcome is confirmed", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "verifiable-deal-agent-"));
+  const tracePath = join(directory, "trace.json");
+  const sha256 = "c".repeat(64);
+
+  try {
+    await createPendingAnchor(tracePath, { network: "testnet2", traceSha256: sha256, issuer: "DIRECT://example" });
+
+    await assert.rejects(
+      () => createPendingAnchor(tracePath, { network: "testnet2", traceSha256: sha256, issuer: "DIRECT://example" }),
+      /unconfirmed anchor attempt/
+    );
+
+    await finalizeAnchorReceipt(tracePath, {
+      network: "testnet2",
+      traceSha256: sha256,
+      tokenId: "token-123",
+      issuer: "DIRECT://example",
+      anchoredAt: "2026-09-21T00:00:00.000Z"
+    });
+
+    assert.deepEqual(await readAnchorReceipt(tracePath, sha256), {
+      network: "testnet2",
+      traceSha256: sha256,
+      tokenId: "token-123",
+      issuer: "DIRECT://example",
+      anchoredAt: "2026-09-21T00:00:00.000Z"
+    });
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
 });
